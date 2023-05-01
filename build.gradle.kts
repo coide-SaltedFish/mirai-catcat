@@ -3,13 +3,20 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.11.1"
+    id("net.mamoe.mirai-console") version "2.13.0"
 }
 
-group = "org.example"
+group = "org.sereinfish.catcat.mirai-catcat"
 version = "0.1.0"
 
 repositories {
     maven("https://maven.aliyun.com/repository/public") // 阿里云国内代理仓库
     mavenCentral()
+}
+
+dependencies{
+    implementation(kotlin("reflect"))
+
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 }
