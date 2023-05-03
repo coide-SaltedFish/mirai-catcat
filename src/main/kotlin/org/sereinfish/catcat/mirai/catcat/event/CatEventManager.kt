@@ -1,6 +1,10 @@
 package org.sereinfish.catcat.mirai.catcat.event
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.mamoe.mirai.console.plugin.id
+import net.mamoe.mirai.console.plugin.name
 import net.mamoe.mirai.event.Event
 import net.mamoe.mirai.event.GlobalEventChannel
 import org.sereinfish.catcat.mirai.catcat.utils.SortedList
@@ -17,14 +21,21 @@ object CatEventManager {
 
     init {
         // 处理协程
-        repeat(maxThreadCount){ i ->
+        repeat(maxThreadCount){
             contextScope.launch {
                 try {
                     while (true){
-                        // TODO 进行事件处理
+                        try {
+                            // 进行事件处理
+                            broadcast(withContext(Dispatchers.IO) {
+                                eventQueue.take()
+                            })
+                        }catch (e: Exception){
+                            logger.error("在进行事件处理时出现了未处理异常，此异常可能导致框架无法正常运行", e)
+                        }
                     }
                 }catch (e: Exception){
-                    logger.error("事件处理协程未知异常", e)
+                    logger.error("事件处理协程未知异常，此事件处理协程已关闭", e)
                 }
             }
         }
@@ -40,7 +51,15 @@ object CatEventManager {
      */
     private suspend fun broadcast(event: Event){
         plugins.forEach {
-            it.broadcast(event)
+            try {
+                it.broadcast(event)
+            }catch (e: Exception){
+                logger.error("""
+                    插件：${it.plugin.name}(${it.plugin.id})
+                    信息：在接收事件广播时出现了未处理异常(${e::class.java.name})
+                    异常：${e.message}
+                """.trimIndent(), e)
+            }
         }
     }
 }

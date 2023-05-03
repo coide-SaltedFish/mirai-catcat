@@ -4,6 +4,8 @@ package org.sereinfish.catcat.mirai.catcat.core.handler
  * 这是一个处理器
  */
 interface Handler<C: HandlerContext> {
+    var level: Int?
+
     // 前置处理链
     val beforeHandlerChain: HandlerChain
     // 后置处理链

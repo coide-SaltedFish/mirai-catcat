@@ -16,8 +16,9 @@ class EventHandler(
     override val beforeHandlerChain: HandlerChain = EventHandleChain(),
     override val afterHandlerChain: HandlerChain = EventHandleChain(),
     override val catchHandlerChain: HandlerChain = EventHandleChain(),
+    override var level: Int? = null,
 
-    private val handler: (context: HandlerContext) -> Unit
+    private val handler: (context: HandlerContext) -> Unit,
 ) : Handler<EventHandlerContext> {
 
     override fun invoke(context: EventHandlerContext) {

@@ -11,8 +11,9 @@ class EventFilterHandler(
     override val beforeHandlerChain: HandlerChain = EventHandleChain(),
     override val afterHandlerChain: HandlerChain = EventHandleChain(),
     override val catchHandlerChain: HandlerChain = EventHandleChain(),
+    override var level: Int? = null,
 
-    private val handler: (context: EventFilterHandlerContext) -> Unit
+    private val handler: (context: EventFilterHandlerContext) -> Unit,
 ) : FilterHandler {
     override fun filter(context: EventFilterHandlerContext): Boolean {
         return context.filterResult
