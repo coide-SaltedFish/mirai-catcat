@@ -1,5 +1,6 @@
 package org.sereinfish.catcat.mirai.catcat.utils
 
+import org.sereinfish.catcat.mirai.catcat.packages.manager.CatPackageManager
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.jvmName
 
@@ -51,4 +52,12 @@ object AnnotationUtils {
                 }
             }
         }
+
+    /**
+     * 判断在所有层级上是否有指定注解
+     */
+    inline fun <reified T: Annotation> KFunction<*>.functionExistAnnotationAll(): Boolean {
+        val ans = getAnnotationAll(this)
+        return ans.find { it::annotationClass == T::class }.isNull()
+    }
 }

@@ -7,16 +7,17 @@ import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
 /**
  * 事件过滤处理器
  */
-class EventFilterHandler(
-    override val beforeHandlerChain: HandlerChain = EventHandleChain(),
-    override val afterHandlerChain: HandlerChain = EventHandleChain(),
-    override val catchHandlerChain: HandlerChain = EventHandleChain(),
+open class EventFilterHandler(
+    override var beforeHandlerChain: HandlerChain = EventHandleChain(),
+    override var afterHandlerChain: HandlerChain = EventHandleChain(),
+    override var catchHandlerChain: HandlerChain = EventHandleChain(),
     override var level: Int? = null,
 
     private val handler: (context: EventFilterHandlerContext) -> Unit,
 ) : FilterHandler {
     override fun filter(context: EventFilterHandlerContext): Boolean {
-        return context.filterResult
+        handler.invoke(context) // 执行函数
+        return context.filterResult // 返回结果
     }
 
     override fun handle(context: HandlerContext) {

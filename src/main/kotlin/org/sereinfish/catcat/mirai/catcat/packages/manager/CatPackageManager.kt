@@ -3,6 +3,8 @@ package org.sereinfish.catcat.mirai.catcat.packages.manager
 import net.mamoe.mirai.console.plugin.Plugin
 import net.mamoe.mirai.console.plugin.id
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginClasspath
+import org.sereinfish.catcat.mirai.catcat.event.CatEventListener
+import org.sereinfish.catcat.mirai.catcat.event.CatEventManager
 import org.sereinfish.catcat.mirai.catcat.packages.manager.utils.PackageUtils
 import org.sereinfish.catcat.mirai.catcat.utils.AnnotationUtils
 import org.sereinfish.catcat.mirai.catcat.utils.tryCatch
@@ -20,14 +22,12 @@ object CatPackageManager {
     /**
      * 初始化包管理器
      */
-    fun init(plugin: Plugin, pluginClasspath: JvmPluginClasspath) =
+    fun init(plugin: Plugin, pluginClasspath: JvmPluginClasspath, level: Int = 0) =
         PluginInfoData(plugin, pluginClasspath).also {
             pluginInfos[plugin.id] = it
 
             // 注册事件监听器
-//            it.getClassByInterface(CatEventListener::class.java).forEach {
-//                CatEventManager.registerListener(it)
-//            }
+            CatEventManager.registerListener(it, level)
         }
 
 
@@ -121,7 +121,7 @@ object CatPackageManager {
 
             // 所有方法
             val functions = clazz.kotlin.functions
-            val memberExtensionFunctions = clazz.kotlin.memberExtensionFunctions
+            val memberExtensionFunctions = clazz.kotlin.memberExtensionFunctions // 扩展函数
 
             // 所有层级下的注解
             val annotationAll = AnnotationUtils.getAnnotationAll(clazz)
@@ -130,6 +130,11 @@ object CatPackageManager {
             // 所有层级下的接口
             val interfacesAll = PackageUtils.getInterfaceAll(clazz)
             val interfaces = clazz.interfaces
+
+            /**
+             * 判断是否是扩展函数
+             */
+            fun isExtension(function: KFunction<*>): Boolean = memberExtensionFunctions.contains(function)
 
             /**
              * 得到所有层级上具有指定注解的方法

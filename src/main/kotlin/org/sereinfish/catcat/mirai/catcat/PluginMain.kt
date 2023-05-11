@@ -3,9 +3,7 @@ package org.sereinfish.catcat.mirai.catcat
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.utils.info
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.core.LoggerContext
-import org.apache.logging.log4j.core.config.Configurator
+import org.sereinfish.catcat.mirai.catcat.event.CatEventManager
 
 object PluginMain : KotlinPlugin(
     JvmPluginDescription(
@@ -22,6 +20,7 @@ object PluginMain : KotlinPlugin(
     }
 ) {
     override fun onEnable() {
+        CatEventManager // 进行初始化
         logger.info { "Plugin loaded" }
     }
 }

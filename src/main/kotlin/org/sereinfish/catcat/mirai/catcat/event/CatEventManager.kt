@@ -3,10 +3,13 @@ package org.sereinfish.catcat.mirai.catcat.event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.mamoe.mirai.console.plugin.Plugin
 import net.mamoe.mirai.console.plugin.id
 import net.mamoe.mirai.console.plugin.name
 import net.mamoe.mirai.event.Event
 import net.mamoe.mirai.event.GlobalEventChannel
+import org.sereinfish.catcat.mirai.catcat.event.untils.pluginErrorInfoLog
+import org.sereinfish.catcat.mirai.catcat.packages.manager.CatPackageManager
 import org.sereinfish.catcat.mirai.catcat.utils.SortedList
 import org.sereinfish.catcat.mirai.catcat.utils.creatContextScope
 import org.sereinfish.catcat.mirai.catcat.utils.logger
@@ -47,6 +50,17 @@ object CatEventManager {
     }
 
     /**
+     * 插件注册
+     */
+    fun registerListener(pluginInfo: CatPackageManager.PluginInfoData, level: Int){
+        try {
+            plugins.add(PluginEventInfo(pluginInfo), level)
+        }catch (e: Exception){
+            logger.error(pluginErrorInfoLog(pluginInfo.plugin, "插件注册失败"), e)
+        }
+    }
+
+    /**
      * 事件广播
      */
     private suspend fun broadcast(event: Event){
@@ -54,11 +68,10 @@ object CatEventManager {
             try {
                 it.broadcast(event)
             }catch (e: Exception){
-                logger.error("""
-                    插件：${it.plugin.name}(${it.plugin.id})
-                    信息：在接收事件广播时出现了未处理异常(${e::class.java.name})
-                    异常：${e.message}
-                """.trimIndent(), e)
+                logger.error(pluginErrorInfoLog(
+                    it.plugin,
+                    "在接收事件广播时出现了未处理异常(${e::class.java.name})"
+                ), e)
             }
         }
     }

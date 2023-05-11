@@ -1,29 +1,29 @@
 package org.sereinfish.catcat.mirai.catcat.event.handler
 
+import net.mamoe.mirai.event.Event
 import org.sereinfish.catcat.mirai.catcat.event.handler.filter.EventFilterHandlerChain
 import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerChain
-import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
-import org.sereinfish.catcat.mirai.catcat.event.handler.filter.EventFilterHandlerContext
 import org.sereinfish.catcat.mirai.catcat.utils.isFalse
+import org.sereinfish.catcat.mirai.catcat.utils.isTrue
 
 /**
  * 事件处理器
  */
 class EventHandler(
-    val filter: EventFilterHandlerChain, // 过滤器
+    val filter: EventFilterHandlerChain = EventFilterHandlerChain(), // 过滤器
 
-    override val beforeHandlerChain: HandlerChain = EventHandleChain(),
-    override val afterHandlerChain: HandlerChain = EventHandleChain(),
-    override val catchHandlerChain: HandlerChain = EventHandleChain(),
+    override var beforeHandlerChain: HandlerChain = EventHandleChain(),
+    override var afterHandlerChain: HandlerChain = EventHandleChain(),
+    override var catchHandlerChain: HandlerChain = EventHandleChain(),
     override var level: Int? = null,
 
-    private val handler: (context: HandlerContext) -> Unit,
+    private val handler: Event.(context: EventHandlerContext) -> Unit,
 ) : Handler<EventHandlerContext> {
 
     override fun invoke(context: EventHandlerContext) {
         // 过滤器执行
-        filter.filterInvoke(context).isFalse {
+        filter.filterInvoke(context).isTrue {
             // 处理器执行
             super.invoke(context)
         }
@@ -31,6 +31,6 @@ class EventHandler(
 
     override fun handle(context: EventHandlerContext) {
         // 处理器部分
-        handler.invoke(context)
+        handler.invoke(context.event, context)
     }
 }

@@ -7,11 +7,11 @@ interface Handler<C: HandlerContext> {
     var level: Int?
 
     // 前置处理链
-    val beforeHandlerChain: HandlerChain
+    var beforeHandlerChain: HandlerChain
     // 后置处理链
-    val afterHandlerChain: HandlerChain
+    var afterHandlerChain: HandlerChain
     // 异常处理链
-    val catchHandlerChain: HandlerChain
+    var catchHandlerChain: HandlerChain
 
     /**
      * 处理器的执行

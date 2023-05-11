@@ -19,6 +19,12 @@ class SortedList<T>(
         TODO("Not yet implemented")
     }
 
+    fun addAll(elements: SortedList<T>) {
+        elements.items.forEach {
+            add(it.data, it.level)
+        }
+    }
+
     override fun add(element: T): Boolean {
         add(element, 0)
         return true

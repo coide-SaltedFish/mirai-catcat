@@ -13,14 +13,14 @@ import org.sereinfish.catcat.mirai.catcat.utils.isTrue
  * 过滤器链
  */
 class EventFilterHandlerChain(
-    val filterHandlerChain: SortedList<FilterHandler>,
+    val filterHandlerChain: SortedList<FilterHandler> = SortedList(),
 ) : HandlerChain {
     override val handlerChain: SortedList<Handler<HandlerContext>> = filterHandlerChain.map { it }
 
     /**
      * 是否过滤
      *
-     * 返回 true 拦截， false 不拦截
+     * 返回 true 通过， false 拦截
      */
     fun filterInvoke(context: EventHandlerContext): Boolean{
         return filterHandlerChain.forEachResult {

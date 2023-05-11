@@ -4,7 +4,11 @@ import kotlinx.coroutines.*
 import org.sereinfish.catcat.mirai.catcat.PluginMain
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.jvm.jvmErasure
 
 val logger = PluginMain.logger
 
@@ -102,6 +106,26 @@ inline fun <T> Array<out T>.forEachResult(action: (T) -> Boolean): Boolean {
     }
     return ret
 }
+
+/**
+ * 方法是否需要实例执行
+ */
+val KFunction<*>.isInstance
+    get() = this.instanceParameter.isNull().not()
+
+/**
+ * 是否是扩展函数
+ */
+val KFunction<*>.isExtension
+    get() = this.parameters.any { it.kind == KParameter.Kind.EXTENSION_RECEIVER }
+
+/**
+ * 获取扩展函数所属类
+ */
+val KFunction<*>.extensionInfo: KClass<*>?
+    get() = this.parameters.firstOrNull {
+        it.kind == KParameter.Kind.EXTENSION_RECEIVER
+    }?.type?.jvmErasure
 
 /**
  * 创建一个协程作用域
