@@ -14,7 +14,7 @@ import kotlin.reflect.full.isSuperclassOf
  */
 class CatchHandlerBuilder<E: Throwable>(
     val exs: Array<KClass<out E>>,
-    handle: Event.(context: EventHandlerContext) -> Unit,
+    handle: suspend Event.(context: EventHandlerContext) -> Unit,
 ){
     val eventHandler = EventHandler(level = 0, handler = handle)
 
@@ -43,12 +43,28 @@ class CatchHandlerBuilder<E: Throwable>(
 /**
  * 异常处理器
  */
-inline fun <E: Throwable> catchBuilder(
+suspend inline fun <E: Throwable> catchHandler(
     exs: Array<KClass<out E>>,
     builder: CatchHandlerBuilder<E>.() -> Unit = {},
-    crossinline block: E.(EventHandlerContext) -> Unit
+    crossinline block: suspend E.(EventHandlerContext) -> Unit
 ): Handler<HandlerContext> {
     val build = CatchHandlerBuilder(exs){
+        it.throwable?.let {e ->
+            block(e as E, it)
+        }
+    }
+    build.builder()
+    return build.build() as Handler<HandlerContext>
+}
+
+/**
+ * 异常处理器
+ */
+suspend inline fun <reified E: Throwable> catchHandler(
+    builder: CatchHandlerBuilder<E>.() -> Unit = {},
+    crossinline block: suspend E.(EventHandlerContext) -> Unit
+): Handler<HandlerContext> {
+    val build = CatchHandlerBuilder(arrayOf(E::class)){
         it.throwable?.let {e ->
             block(e as E, it)
         }

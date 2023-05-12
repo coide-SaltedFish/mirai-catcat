@@ -12,5 +12,5 @@ interface FilterHandler: Handler<HandlerContext> {
      *
      * 返回 true 拦截， false 不拦截
      */
-    fun filter(context: EventFilterHandlerContext): Boolean
+    suspend fun filter(context: EventFilterHandlerContext): Boolean
 }

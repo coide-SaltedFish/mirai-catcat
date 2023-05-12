@@ -24,5 +24,6 @@ open class EventHandlerContext(
 
     init {
         context["event"] = event
+        // 初始化默认类型转换器
     }
 }

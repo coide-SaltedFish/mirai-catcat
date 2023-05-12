@@ -6,6 +6,7 @@ import net.mamoe.mirai.message.data.PlainText
 import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterChain
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterContext
+import org.sereinfish.catcat.mirai.catcat.event.router.or
 import org.sereinfish.catcat.mirai.catcat.utils.isTrue
 import org.sereinfish.catcat.mirai.catcat.utils.logger
 import kotlin.reflect.KClass
@@ -34,9 +35,16 @@ class RouterChainBuilder{
         return list
     }
 
+    /**
+     * 或路由
+     */
+    infix fun Router.or(second: Router): List<Router> {
+        list.add(or(this, second))
+        return list
+    }
+
     fun build(): Router{
         var node: Router = Router
-
         list.forEach {
             node = node.then(it)
         }
@@ -94,7 +102,7 @@ class RouterBuilderTool(
     fun contentType(type: KClass<out MessageContent>){
         matchFuncs.add(MatchFuncData {
             it?.let {
-                (it::class == type).isTrue {
+                (type.java.isAssignableFrom(it::class.java)).isTrue {
                     // 存入缓存
                     matchDataTemp.add(it)
                 }
@@ -217,7 +225,6 @@ class RouterBuilderTool(
         for (item in matchFuncs){
             val data = waitMatchData?.firstOrNull()
             waitMatchData?.removeFirstOrNull()
-
             if (!item.block(data)){
                 return false
             }
@@ -238,7 +245,7 @@ abstract class AbstractRouter: RouterChain() {
         val tool = RouterBuilderTool(context)
         tool.match()
         return tool.build().isTrue {
-            // 进行匹配数据缓存
+            // 进行匹配数据缓存同步
             context.matchDataCache.addAll(tool.matchDataTemp)
         }
     }
@@ -247,4 +254,10 @@ abstract class AbstractRouter: RouterChain() {
      * 在路由构建工具环境下进行方便的路由构建
      */
     abstract fun RouterBuilderTool.match()
+}
+
+inline fun buildRouterChain(block: RouterChainBuilder.() -> Unit): Router {
+    val builder = RouterChainBuilder()
+    builder.block()
+    return builder.build()
 }

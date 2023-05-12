@@ -1,16 +1,13 @@
 package org.sereinfish.catcat.mirai.catcat.event.extend
 
 import net.mamoe.mirai.event.Event
-import net.mamoe.mirai.event.events.MessageEvent
 import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
-import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.RouterChainBuilder
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandler
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandlerContext
 import org.sereinfish.catcat.mirai.catcat.event.handler.filter.RouterFilterHandler
 import org.sereinfish.catcat.mirai.catcat.event.untils.HandlerLevel
-import java.security.InvalidAlgorithmParameterException
 import kotlin.reflect.KClass
 
 /**
@@ -23,13 +20,21 @@ import kotlin.reflect.KClass
  * 前置处理器构建器
  */
 class EventHandlerBuilder<E: Event>(
-    handle: Event.(context: EventHandlerContext) -> Unit,
+    val eventType: KClass<out E>, // 事件类型
+    handle: suspend Event.(context: EventHandlerContext) -> Unit,
 ){
     val eventHandler = EventHandler(level = 0, handler = handle)
 
     var level: Int?
         get() = eventHandler.level
         set(value) { eventHandler.level = value }
+
+    init {
+        eventHandler.filter.add(filter<E> {
+            // 事件类型筛选
+            eventType.java.isAssignableFrom(it.event::class.java)
+        }, HandlerLevel.HIGH)
+    }
 
     /**
      * 构建过滤器链
@@ -44,46 +49,42 @@ class EventHandlerBuilder<E: Event>(
     /**
      * 构建前置处理器
      */
-    inline fun before(
-        builder: EventHandlerBuilder<E>.() -> Unit = {},
-        crossinline block: E.(EventHandlerContext) -> Unit
+    suspend inline fun <reified BE: E> before(
+        builder: EventHandlerBuilder<BE>.() -> Unit = {},
+        crossinline block: suspend BE.(EventHandlerContext) -> Unit
     ){
-        val handler = handler<E>({ builder() }){
-            block(it)
-        }
+        val handler = handler(builder, block)
         eventHandler.beforeHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
     }
 
     /**
      * 构建后置处理器
      */
-    inline fun after(
-        builder: EventHandlerBuilder<E>.() -> Unit = {},
-        crossinline block: E.(EventHandlerContext) -> Unit
+    suspend inline fun <reified AE: E> after(
+        builder: EventHandlerBuilder<AE>.() -> Unit = {},
+        crossinline block: suspend AE.(EventHandlerContext) -> Unit
     ){
-        val handler = handler<E>({ builder() }){
-            block(it)
-        }
+        val handler = handler(builder, block)
         eventHandler.afterHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
     }
 
     /**
      * 构建异常处理器
      */
-    inline fun <reified E: Throwable> catch(
+    suspend inline fun <reified E: Throwable> catch(
         builder: CatchHandlerBuilder<E>.() -> Unit = {},
-        crossinline block: E.(EventHandlerContext) -> Unit
+        crossinline block: suspend E.(EventHandlerContext) -> Unit
     ){
-        val handler = catchBuilder(arrayOf(E::class), builder, block)
+        val handler = catchHandler(arrayOf(E::class), builder, block)
         eventHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
     }
 
-    inline fun <reified E: Throwable> catch(
+    suspend inline fun <reified E: Throwable> catch(
         exs: Array<KClass<out E>>,
         builder: CatchHandlerBuilder<E>.() -> Unit = {},
         crossinline block: E.(EventHandlerContext) -> Unit
     ){
-        val handler = catchBuilder(exs, builder, block)
+        val handler = catchHandler(exs, builder, block)
         eventHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
     }
 
@@ -102,37 +103,13 @@ class EventHandlerBuilder<E: Event>(
 /**
  * 构建处理器
  */
-inline fun <E: Event> handler(
-    builder: EventHandlerBuilder<E>.() -> Unit,
-    crossinline handler: E.(context: EventHandlerContext) -> Unit
+suspend inline fun <reified E: Event> handler(
+    builder: EventHandlerBuilder<E>.() -> Unit = {},
+    crossinline handler: suspend E.(context: EventHandlerContext) -> Unit
 ): Handler<HandlerContext> {
-    val build = EventHandlerBuilder<E> {
+    val build = EventHandlerBuilder(eventType = E::class) {
         handler(it.event as E, it)
     }
     build.builder()
     return build.build() as Handler<HandlerContext>
-}
-
-val d = handler<MessageEvent>({
-    level = 2
-    filter {
-        true
-    }
-    after {
-
-    }
-    before {
-
-    }
-    catch<TypeCastException> {
-
-    }
-    catch(arrayOf(
-        IllegalMonitorStateException::class,
-        IllegalThreadStateException::class
-    )) {
-
-    }
-}){
-
 }

@@ -17,7 +17,7 @@ interface HandlerChain {
     }
 
     // 链的执行
-    fun invoke(context: HandlerContext){
+    suspend fun invoke(context: HandlerContext){
         handlerChain.forEach {
             it.invoke(context)
         }

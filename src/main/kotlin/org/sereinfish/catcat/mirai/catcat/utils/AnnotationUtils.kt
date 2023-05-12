@@ -55,9 +55,12 @@ object AnnotationUtils {
 
     /**
      * 判断在所有层级上是否有指定注解
+     *
+     * true 有
+     * false 没有
      */
     inline fun <reified T: Annotation> KFunction<*>.functionExistAnnotationAll(): Boolean {
         val ans = getAnnotationAll(this)
-        return ans.find { it::annotationClass == T::class }.isNull()
+        return ans.find { it::annotationClass == T::class }.isNull().not()
     }
 }

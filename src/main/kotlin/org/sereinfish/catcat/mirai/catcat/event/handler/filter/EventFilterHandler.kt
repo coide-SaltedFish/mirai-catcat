@@ -13,14 +13,16 @@ open class EventFilterHandler(
     override var catchHandlerChain: HandlerChain = EventHandleChain(),
     override var level: Int? = null,
 
-    private val handler: (context: EventFilterHandlerContext) -> Unit,
+    private val handler: suspend (context: EventFilterHandlerContext) -> Unit,
 ) : FilterHandler {
-    override fun filter(context: EventFilterHandlerContext): Boolean {
+    override suspend fun filter(context: EventFilterHandlerContext): Boolean {
         handler.invoke(context) // 执行函数
         return context.filterResult // 返回结果
     }
 
-    override fun handle(context: HandlerContext) {
-        handler.invoke(context as EventFilterHandlerContext)
+    override suspend fun handle(context: HandlerContext) {
+        if (context is EventFilterHandlerContext)
+            handler.invoke(context)
+        else throw TypeCastException("错误的上下文类型，执行失败")
     }
 }

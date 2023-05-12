@@ -1,6 +1,8 @@
 package org.sereinfish.catcat.mirai.catcat.utils
 
 import kotlinx.coroutines.*
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.message.data.Message
 import org.sereinfish.catcat.mirai.catcat.PluginMain
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
@@ -126,6 +128,18 @@ val KFunction<*>.extensionInfo: KClass<*>?
     get() = this.parameters.firstOrNull {
         it.kind == KParameter.Kind.EXTENSION_RECEIVER
     }?.type?.jvmErasure
+
+// 消息发送协程域
+private val sendMessageScope = creatContextScope("sendMessageScope")
+suspend fun MessageEvent.sendMessage(message: Message) =
+    CoroutineScope(Dispatchers.Default).launch {
+        subject.sendMessage(message)
+    }.join()
+
+suspend fun MessageEvent.sendMessage(message: String) =
+    CoroutineScope(Dispatchers.Default).launch {
+        subject.sendMessage(message)
+    }.join()
 
 /**
  * 创建一个协程作用域

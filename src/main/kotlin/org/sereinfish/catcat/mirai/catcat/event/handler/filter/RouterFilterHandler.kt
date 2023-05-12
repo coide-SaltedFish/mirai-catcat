@@ -3,6 +3,7 @@ package org.sereinfish.catcat.mirai.catcat.event.handler.filter
 import net.mamoe.mirai.event.events.MessageEvent
 import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterContext
+import org.sereinfish.catcat.mirai.catcat.event.router.TextRouter
 import org.sereinfish.catcat.mirai.catcat.utils.logger
 
 /**
@@ -12,6 +13,7 @@ class RouterFilterHandler(
     private val router: Router
 ): EventFilterHandler(handler = {
     if (it.event is MessageEvent){
+
         val routerContext = RouterContext(it.event)
         routerContext.addAll(it)
         val matchResult = router.toInner(routerContext) // 匹配结果

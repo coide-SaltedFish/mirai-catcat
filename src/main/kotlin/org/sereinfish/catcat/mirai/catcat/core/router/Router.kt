@@ -24,9 +24,12 @@ interface Router {
      * 进行执行
      */
     fun toInner(context: RouterContext): Boolean{
-        if (inner?.toInner(context).isTrue()) {
-            return match(context) // 执行自己
-        }
+        inner?.let {
+            if (it.toInner(context)) { // 执行上一个
+                return match(context) // 执行自己
+            }
+        } ?: return match(context)
+
         return false
     }
 

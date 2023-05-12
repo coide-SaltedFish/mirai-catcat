@@ -20,6 +20,7 @@ import kotlin.reflect.full.isSupertypeOf
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.javaType
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.jvm.jvmName
 
 /**
@@ -62,9 +63,10 @@ class EventListenerInfo(
      * 在监听器内进行事件广播
      */
     suspend fun broadcast(event: Event){
-        val context = EventHandlerContext(event)
         for (handler in handlerChain.handlerChain){
             // 处理器执行
+            val context = EventHandlerContext(event)
+
             handler.invoke(context)
 
             // 判断是否停止
@@ -135,13 +137,14 @@ class EventListenerInfo(
 
     private suspend fun getHandler(function: KFunction<*>): Handler<HandlerContext>?{
         // 执行前检查
-        if (function.returnType.isSupertypeOf(Handler::class.starProjectedType).not()) { // 检查返回类型
+        if (Handler::class.java.isAssignableFrom(function.returnType.jvmErasure.java).not()) { // 检查返回类型
             logger.error(pluginErrorInfoLog(
                 pluginEventInfo.plugin,
                 """
                         处理器加载失败
+                        异常插件：${pluginEventInfo.plugin.name}(${pluginEventInfo.plugin.id})
                         方法路径：${classInfo.clazz.name}.${function.name}
-                        返回类型：${function.returnType.javaType.typeName}
+                        返回类型：${function.returnType.javaClass.typeName}
                         信息：错误的返回类型，返回类型应该为Handler或其子类
                     """.trimIndent()
             ))
@@ -150,6 +153,7 @@ class EventListenerInfo(
                 pluginEventInfo.plugin,
                 """
                         处理器加载失败
+                        异常插件：${pluginEventInfo.plugin.name}(${pluginEventInfo.plugin.id})
                         方法路径：${classInfo.clazz.name}.${function.name}
                         参数列表：${function.valueParameters.map { it.name }.toTypedArray().contentToString()}
                         信息：错误的参数，此方法不应有参数
@@ -160,6 +164,7 @@ class EventListenerInfo(
                 pluginEventInfo.plugin,
                 """
                         处理器加载失败
+                        异常插件：${pluginEventInfo.plugin.name}(${pluginEventInfo.plugin.id})
                         方法路径：${classInfo.clazz.name}.${function.name}
                         所属扩展类：${function.extensionInfo?.jvmName}}
                         信息：错误的参数，此方法不应有参数

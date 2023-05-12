@@ -11,6 +11,6 @@ open class EventFilterHandlerContext(
     }
 
     var filterResult: Boolean
-        get() = context["filterResult"] as? Boolean ?: false
+        get() = context["filterResult"] as? Boolean ?: true
         set(value) { context["filterResult"] = value }
 }

@@ -5,25 +5,30 @@ import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterChain
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterContext
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.RouterChainBuilder
+import org.sereinfish.catcat.mirai.catcat.utils.isTrue
 
 /**
- * 可选路由
+ * 或匹配，两个中的一个匹配成功就算成功
  */
-class OptionalRouter(
-    val router: Router
+class OrRouter(
+    val first: Router,
+    val second: Router
 ): RouterChain() {
-
     override fun match(context: RouterContext): Boolean {
         // 保存现场
         val waitMatchData = ArrayList<MessageContent>()
         context.waitMatchData?.let { waitMatchData.addAll(it) }
 
-        if (!router.toInner(context)) {
-            // 匹配不成功
-            context.waitMatchData = waitMatchData // 恢复现场
+        // 第一个匹配
+        first.toInner(context).isTrue {
+            return true
         }
-        return true
+
+        // 恢复现场
+        context.waitMatchData = waitMatchData
+
+        return second.toInner(context)
     }
 }
 
-fun RouterChainBuilder.optional(router: Router) = OptionalRouter(router)
+fun RouterChainBuilder.or(first: Router, second: Router) = OrRouter(first, second)

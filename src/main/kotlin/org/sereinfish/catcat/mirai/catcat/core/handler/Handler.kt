@@ -16,14 +16,13 @@ interface Handler<C: HandlerContext> {
     /**
      * 处理器的执行
      */
-    fun invoke(context: C){
+    suspend fun invoke(context: C){
         try {
             beforeHandlerChain.invoke(context) // 前置链执行
             handle(context)
             afterHandlerChain.invoke(context) // 后置链执行
         }catch (e: Exception){
             catchHandlerChain.invoke(context) // 异常处理链执行
-
             // 如果没有完成处理，抛出异常
             context.throwable?.let {
                 throw it
@@ -34,5 +33,5 @@ interface Handler<C: HandlerContext> {
     /**
      * 进行处理
      */
-    fun handle(context: C)
+    suspend fun handle(context: C)
 }

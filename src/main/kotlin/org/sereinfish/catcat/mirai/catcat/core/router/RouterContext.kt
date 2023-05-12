@@ -8,6 +8,10 @@ class RouterContext(
     val messageEvent: MessageEvent
 ) : EventHandlerContext(messageEvent) {
 
+    init {
+        context["waitMatchData"] = messageEvent.message.filterIsInstance<MessageContent>().toMutableList()
+    }
+
     var waitMatchData: MutableList<MessageContent>?
         get() = context["waitMatchData"] as? MutableList<MessageContent>
         set(value) { context["waitMatchData"] = value }

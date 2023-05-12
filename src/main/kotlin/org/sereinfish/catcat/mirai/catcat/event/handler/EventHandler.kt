@@ -18,10 +18,10 @@ class EventHandler(
     override var catchHandlerChain: HandlerChain = EventHandleChain(),
     override var level: Int? = null,
 
-    private val handler: Event.(context: EventHandlerContext) -> Unit,
+    private val handler: suspend Event.(context: EventHandlerContext) -> Unit,
 ) : Handler<EventHandlerContext> {
 
-    override fun invoke(context: EventHandlerContext) {
+    override suspend fun invoke(context: EventHandlerContext) {
         // 过滤器执行
         filter.filterInvoke(context).isTrue {
             // 处理器执行
@@ -29,7 +29,7 @@ class EventHandler(
         }
     }
 
-    override fun handle(context: EventHandlerContext) {
+    override suspend fun handle(context: EventHandlerContext) {
         // 处理器部分
         handler.invoke(context.event, context)
     }
