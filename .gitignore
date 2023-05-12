@@ -5,3 +5,12 @@
 /test/
 /out/
 /run/
+/.run/
+/config/
+/data/
+/debug-sandbox/
+/gradle/
+/logs/
+/plugin-libraries/
+/plugin-shared-libraries/
+/plugins/
