@@ -171,9 +171,22 @@ class EventListenerInfo(
                     """.trimIndent()
             ))
         }else {
-            return (if (function.isInstance){
-                function.callSuspend(instance)
-            }else function.callSuspend()) as Handler<HandlerContext>
+            return try {
+                (if (function.isInstance){
+                    function.callSuspend(instance)
+                }else function.callSuspend()) as Handler<HandlerContext>
+            }catch (e: Exception){
+                logger.error(pluginErrorInfoLog(
+                    pluginEventInfo.plugin,
+                    """
+                        处理器加载失败
+                        异常插件：${pluginEventInfo.plugin.name}(${pluginEventInfo.plugin.id})
+                        方法路径：${classInfo.clazz.name}.${function.name}
+                        信息：构建器执行失败
+                    """.trimIndent()
+                ))
+                throw e.cause ?: e
+            }
         }
         return null
     }

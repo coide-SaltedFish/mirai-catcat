@@ -237,10 +237,12 @@ class RouterBuilderTool(
     fun save(name: String){
         if (matchDataTemp.isEmpty()){
             logger.warning("尝试保存已匹配数据[$name]，但已匹配数据为空")
+        }else {
+            context[name] = if (matchDataTemp.size == 1){
+                matchDataTemp.firstOrNull()
+            }else matchDataTemp
         }
-        context[name] = if (matchDataTemp.size == 1){
-           matchDataTemp.firstOrNull()
-        }else matchDataTemp
+
     }
 
     /**

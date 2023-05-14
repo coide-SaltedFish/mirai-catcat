@@ -5,9 +5,9 @@ import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandler
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandlerContext
+import org.sereinfish.catcat.mirai.catcat.event.handler.filter.EventFilterHandler
 import org.sereinfish.catcat.mirai.catcat.event.untils.HandlerLevel
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSuperclassOf
 
 /**
  * 异常处理器
@@ -16,14 +16,14 @@ class CatchHandlerBuilder<E: Throwable>(
     val exs: Array<KClass<out E>>,
     handle: suspend Event.(context: EventHandlerContext) -> Unit,
 ){
-    val eventHandler = EventHandler(level = 0, handler = {
+    val throwableHandler = EventHandler(level = 0, handler = {
         handle(it)
         it.throwable = null
     })
 
     init {
         // 添加异常类型过滤器
-        eventHandler.filter.add(filter<Event>({}){
+        throwableHandler.filter.add(filter<Event>({}){
             // 验证异常类型
             it.throwable?.let { ex ->
                 for (e in exs){
@@ -38,10 +38,47 @@ class CatchHandlerBuilder<E: Throwable>(
     }
 
     var level: Int?
-        get() = eventHandler.level
-        set(value) { eventHandler.level = value }
+        get() = throwableHandler.level
+        set(value) { throwableHandler.level = value }
 
-    fun build() = eventHandler
+    /**
+     * 构建异常处理器
+     */
+    suspend inline fun <reified E: Throwable> catch(
+        builder: CatchHandlerBuilder<E>.() -> Unit = {},
+        crossinline block: suspend E.(EventHandlerContext) -> Unit
+    ){
+        val handler = catchHandler(arrayOf(E::class), builder, block)
+        throwableHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
+    }
+
+    suspend inline fun <reified E: Throwable> catch(
+        exs: Array<KClass<out E>>,
+        builder: CatchHandlerBuilder<E>.() -> Unit = {},
+        crossinline block: E.(EventHandlerContext) -> Unit
+    ){
+        val handler = catchHandler(exs, builder, block)
+        throwableHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
+    }
+
+    suspend inline fun <reified E: Throwable, reified EV: Event> catchEvent(
+        builder: CatchHandlerBuilder<E>.() -> Unit = {},
+        crossinline block: suspend E.(EventHandlerContext, EV) -> Unit
+    ){
+        val handler = catchHandlerEvent(arrayOf(E::class), builder, block)
+        throwableHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
+    }
+
+    suspend inline fun <reified E: Throwable, reified EV: Event> catchEvent(
+        exs: Array<KClass<out E>>,
+        builder: CatchHandlerBuilder<E>.() -> Unit = {},
+        crossinline block: E.(EventHandlerContext, EV) -> Unit
+    ){
+        val handler = catchHandlerEvent(exs, builder, block)
+        throwableHandler.catchHandlerChain.add(handler, handler.level ?: HandlerLevel.NORMAL)
+    }
+
+    fun build() = throwableHandler
 }
 
 /**
@@ -61,6 +98,25 @@ suspend inline fun <E: Throwable> catchHandler(
     return build.build() as Handler<HandlerContext>
 }
 
+suspend inline fun <E: Throwable, reified EV: Event> catchHandlerEvent(
+    exs: Array<KClass<out E>>,
+    builder: CatchHandlerBuilder<E>.() -> Unit = {},
+    crossinline block: suspend E.(EventHandlerContext,EV) -> Unit
+): Handler<HandlerContext> {
+    val build = CatchHandlerBuilder(exs){
+        it.throwable?.let {e ->
+            block(e as E, it, it.event as EV)
+        }
+    }
+    build.builder()
+    return build.build().also {
+        it.filter.add(EventFilterHandler {
+            // 添加事件过滤器
+            EV::class.java.isAssignableFrom(it.event::class.java)
+        }, HandlerLevel.HIGH)
+    } as Handler<HandlerContext>
+}
+
 /**
  * 异常处理器
  */
@@ -77,3 +133,20 @@ suspend inline fun <reified E: Throwable> catchHandler(
     return build.build() as Handler<HandlerContext>
 }
 
+suspend inline fun <reified E: Throwable, reified EV: Event> catchHandlerEvent(
+    builder: CatchHandlerBuilder<E>.() -> Unit = {},
+    crossinline block: suspend E.(EventHandlerContext,EV) -> Unit
+): Handler<HandlerContext> {
+    val build = CatchHandlerBuilder(arrayOf(E::class)){
+        it.throwable?.let {e ->
+            block(e as E, it, it.event as EV)
+        }
+    }
+    build.builder()
+    return build.build().also {
+        it.filter.add(EventFilterHandler {
+            // 添加事件过滤器
+            EV::class.java.isAssignableFrom(it.event::class.java)
+        }, HandlerLevel.HIGH)
+    } as Handler<HandlerContext>
+}
