@@ -27,3 +27,9 @@ class OptionalRouter(
 }
 
 fun RouterChainBuilder.optional(router: Router) = OptionalRouter(router)
+
+fun RouterChainBuilder.optional(block: RouterChainBuilder.() -> Unit): OptionalRouter{
+    val builder = RouterChainBuilder()
+    builder.block()
+    return OptionalRouter(builder.build())
+}
