@@ -1,5 +1,3 @@
-# mirai-console-plugin-template
+# mirai-console-plugin-catcat-mirai
 
-[Mirai Console](https://github.com/mamoe/mirai-console) 插件模板, 使用 Kotlin + Gradle.
-
-[如何使用](https://github.com/project-mirai/how-to-use-plugin-template)
+[Mirai Console](https://github.com/mamoe/mirai-console) 猫猫插件框架
