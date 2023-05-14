@@ -30,10 +30,30 @@ class ParameterRouter(
     }
 }
 
-fun RouterChainBuilder.param(router: Router, name: String, typeHandler: RouterContext.(List<MessageContent>) -> Any? = {
-    if (it.size == 1){
-        it.firstOrNull()
-    }else if (it.isEmpty()){
-        null
-    }else it
-}) = ParameterRouter(router, name, typeHandler)
+fun RouterChainBuilder.param(
+    router: Router,
+    name: String,
+    typeHandler: RouterContext.(List<MessageContent>) -> Any? = {
+        if (it.size == 1){
+            it.firstOrNull()
+        }else if (it.isEmpty()){
+            null
+        }else it
+    }
+) = ParameterRouter(router, name, typeHandler)
+
+fun RouterChainBuilder.param(
+    routerBuilder: RouterChainBuilder.() -> Unit,
+    name: String,
+    typeHandler: RouterContext.(List<MessageContent>) -> Any? = {
+        if (it.size == 1){
+            it.firstOrNull()
+        }else if (it.isEmpty()){
+            null
+        }else it
+    }
+) = ParameterRouter(let {
+    val builder = RouterChainBuilder()
+    builder.routerBuilder()
+    builder.build()
+}, name, typeHandler)
