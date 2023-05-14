@@ -1,10 +1,8 @@
 package org.sereinfish.catcat.mirai.catcat.core.handler
 
 import org.sereinfish.catcat.mirai.catcat.core.context.Context
-import org.sereinfish.catcat.mirai.catcat.utils.forEachCheck
 import org.sereinfish.catcat.mirai.catcat.utils.logger
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
 /**
@@ -34,9 +32,9 @@ open class HandlerContext(
         }
 
     // key1为输入类型，key2为输出类型
-    var typeHandlers: HashMap<KClass<*> ,HashMap<KClass<*>, TypeHandler<*, *>>>
-        get() = context["typeHandlers"] as? HashMap<KClass<*> ,HashMap<KClass<*>, TypeHandler<*, *>>> ?: kotlin.run {
-            val list = HashMap<KClass<*> ,HashMap<KClass<*>, TypeHandler<*, *>>>()
+    var typeHandlers: HashMap<KClass<*> ,HashMap<KClass<*>, TypeFactory<*, *>>>
+        get() = context["typeHandlers"] as? HashMap<KClass<*> ,HashMap<KClass<*>, TypeFactory<*, *>>> ?: kotlin.run {
+            val list = HashMap<KClass<*> ,HashMap<KClass<*>, TypeFactory<*, *>>>()
             context["typeHandlers"] = list
             list
         }
@@ -50,7 +48,7 @@ open class HandlerContext(
     class ValueProxy<T>(
         private val context: HandlerContext,
         private val type: KClass<*>,
-        private val typeHandler: HashMap<KClass<*> ,HashMap<KClass<*>, TypeHandler<*, *>>> = context.typeHandlers
+        private val typeFactory: HashMap<KClass<*> ,HashMap<KClass<*>, TypeFactory<*, *>>> = context.typeHandlers
     ){
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T?{
             return typeHandler(context[property.name])
@@ -65,7 +63,7 @@ open class HandlerContext(
                 val inputType = it::class
                 val outputType = type
                 // 查找能处理的类型
-                typeHandler[inputType]?.get(outputType)?.let {
+                typeFactory[inputType]?.get(outputType)?.let {
                     try {
                         it.castSimple<T>(it)
                     }catch (e: Exception){

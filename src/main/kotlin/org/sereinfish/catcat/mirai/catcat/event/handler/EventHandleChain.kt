@@ -10,6 +10,4 @@ import org.sereinfish.catcat.mirai.catcat.utils.SortedList
  */
 class EventHandleChain(
     override val handlerChain: SortedList<Handler<HandlerContext>> = SortedList()
-) : HandlerChain {
-
-}
+) : HandlerChain

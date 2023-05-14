@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 /**
  * 类型处理
  */
-interface TypeHandler<T : Any, R: Any> {
+interface TypeFactory<T : Any, R: Any> {
     val inputType: KClass<T> // 进入的类型
     val outputType: KClass<R> // 输出的类型
 

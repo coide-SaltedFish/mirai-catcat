@@ -7,6 +7,8 @@ import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterChain
 import org.sereinfish.catcat.mirai.catcat.core.router.RouterContext
 import org.sereinfish.catcat.mirai.catcat.event.router.or
+import org.sereinfish.catcat.mirai.catcat.event.router.regex
+import org.sereinfish.catcat.mirai.catcat.event.router.text
 import org.sereinfish.catcat.mirai.catcat.utils.isTrue
 import org.sereinfish.catcat.mirai.catcat.utils.logger
 import kotlin.reflect.KClass
@@ -32,6 +34,36 @@ class RouterChainBuilder{
 
     operator fun Router.unaryPlus(): List<Router>{
         list.add(this)
+        return list
+    }
+
+    /**
+     * 字符串写法的支持
+     */
+    operator fun Router.plus(other: String): List<Router> {
+        list.add(this@plus)
+        list.add(text(other))
+        return list
+    }
+
+    operator fun String.unaryPlus(): List<Router>{
+        list.add(text(this))
+        return list
+    }
+
+    /**
+     * 正则表达式的支持
+     *
+     * 默认贪心匹配
+     */
+    operator fun Router.plus(other: Regex): List<Router> {
+        list.add(this@plus)
+        list.add(regex(other, true))
+        return list
+    }
+
+    operator fun Regex.unaryPlus(): List<Router>{
+        list.add(regex(this))
         return list
     }
 

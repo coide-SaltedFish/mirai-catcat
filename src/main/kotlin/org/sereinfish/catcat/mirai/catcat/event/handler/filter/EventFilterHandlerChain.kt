@@ -20,8 +20,6 @@ class EventFilterHandlerChain(
      * 返回 true 通过， false 拦截
      */
     suspend fun filterInvoke(context: EventHandlerContext): Boolean{
-        if (context == null) return false // TODO 不清楚的bug
-
         return handlerChain.forEachCheck {
             if (it is FilterHandler){
                 val eventFilterContext = EventFilterHandlerContext(context.event)

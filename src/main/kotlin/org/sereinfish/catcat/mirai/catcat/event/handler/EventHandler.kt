@@ -1,5 +1,6 @@
 package org.sereinfish.catcat.mirai.catcat.event.handler
 
+import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.event.Event
 import org.sereinfish.catcat.mirai.catcat.event.handler.filter.EventFilterHandlerChain
 import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
@@ -31,6 +32,8 @@ class EventHandler(
 
     override suspend fun handle(context: EventHandlerContext) {
         // 处理器部分
-        handler.invoke(context.event, context)
+        runBlocking {
+            handler.invoke(context.event, context)
+        }
     }
 }
