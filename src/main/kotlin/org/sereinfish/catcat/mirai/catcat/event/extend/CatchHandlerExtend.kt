@@ -16,15 +16,19 @@ class CatchHandlerBuilder<E: Throwable>(
     val exs: Array<KClass<out E>>,
     handle: suspend Event.(context: EventHandlerContext) -> Unit,
 ){
-    val eventHandler = EventHandler(level = 0, handler = handle)
+    val eventHandler = EventHandler(level = 0, handler = {
+        handle(it)
+        it.throwable = null
+    })
 
     init {
         // 添加异常类型过滤器
-        eventHandler.filter.add(filter<Event>({}){ it ->
+        eventHandler.filter.add(filter<Event>({}){
             // 验证异常类型
             it.throwable?.let { ex ->
-                exs.forEach { e ->
-                    if (e.isSuperclassOf(ex::class)){ // 列表类异常类型为当前异常子类，触发
+                for (e in exs){
+                    // 列表类异常类型为当前异常子类，触发
+                    if (ex::class.java.isAssignableFrom(e.java)){
                         return@filter true
                     }
                 }
