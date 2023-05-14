@@ -36,3 +36,9 @@ class ArrayRouter(
 }
 
 fun RouterChainBuilder.array(router: Router) = ArrayRouter(router)
+
+fun RouterChainBuilder.array(block: RouterChainBuilder.() -> Unit): ArrayRouter{
+    val builder = RouterChainBuilder()
+    builder.block()
+    return ArrayRouter(builder.build())
+}
