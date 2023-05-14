@@ -22,6 +22,7 @@ interface Handler<C: HandlerContext> {
             handle(context)
             afterHandlerChain.invoke(context) // 后置链执行
         }catch (e: Exception){
+            context.throwable = e
             catchHandlerChain.invoke(context) // 异常处理链执行
             // 如果没有完成处理，抛出异常
             context.throwable?.let {
