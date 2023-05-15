@@ -5,15 +5,13 @@ import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
 import org.sereinfish.catcat.mirai.catcat.core.handler.TypeFactory
 import kotlin.reflect.KClass
 
-class ContentToStringFactory: TypeFactory<String> {
+class ContentToContentFactory: TypeFactory<MessageContent> {
     override fun isHandlerCompatible(value: Any?, outputType: KClass<*>): Boolean {
-        return value is MessageContent && String::class.java.isAssignableFrom(outputType.java)
+        return value is MessageContent
+            && MessageContent::class.java.isAssignableFrom(outputType.java)
     }
 
-    override fun cast(value: Any?, context: HandlerContext): String? {
-        if (value is MessageContent){
-            return value.contentToString()
-        }
-        return null
+    override fun cast(value: Any?, context: HandlerContext): MessageContent? {
+        return value as? MessageContent
     }
 }

@@ -62,6 +62,18 @@ class RouterChainBuilder{
         return list
     }
 
+    operator fun Regex.plus(other: Router): List<Router> {
+        list.add(regex(this, true))
+        list.add(other)
+        return list
+    }
+
+    operator fun Regex.plus(other: Regex): List<Router> {
+        list.add(regex(this, true))
+        list.add(regex(other, true))
+        return list
+    }
+
     operator fun Regex.unaryPlus(): List<Router>{
         list.add(regex(this))
         return list

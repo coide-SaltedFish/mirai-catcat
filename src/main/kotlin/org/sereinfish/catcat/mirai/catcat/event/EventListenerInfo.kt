@@ -7,6 +7,7 @@ import net.mamoe.mirai.event.Event
 import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerChain
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
+import org.sereinfish.catcat.mirai.catcat.core.handler.TypeFactory
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandleChain
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandler
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandlerContext
@@ -66,6 +67,7 @@ class EventListenerInfo(
         for (handler in handlerChain.handlerChain){
             // 处理器执行
             val context = EventHandlerContext(event)
+            context.typeHandlers = TypeFactory.getDefaultTypeFactoryList() // 添加默认类型处理器
 
             handler.invoke(context)
 
