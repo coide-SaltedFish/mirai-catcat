@@ -47,20 +47,36 @@ open class HandlerContext(
     inline fun <reified T> value(typeFactory: SortedList<TypeFactory<*>> = typeHandlers) =
         ValueProxy<T>(this, T::class, typeFactory)
 
-    class ValueProxy<T>(
-        private val context: HandlerContext,
-        private val type: KClass<*>,
-        private val typeFactory: SortedList<TypeFactory<*>>
+    inline fun <reified T> valueOrDefault(
+        default: T,
+        typeFactory: SortedList<TypeFactory<*>> = typeHandlers
+    ) = ValueProxyByDefalut<T>(this, T::class, typeFactory, default)
+
+    class ValueProxyByDefalut<T>(
+        context: HandlerContext,
+        type: KClass<*>,
+        typeFactory: SortedList<TypeFactory<*>>,
+        private val defaultValue: T
+    ): ValueProxy<T>(context, type, typeFactory){
+        override operator fun getValue(thisRef: Any?, property: KProperty<*>): T{
+            return typeHandler(context[property.name], property.name) ?: defaultValue
+        }
+    }
+
+    open class ValueProxy<T>(
+        val context: HandlerContext,
+        val type: KClass<*>,
+        val typeFactory: SortedList<TypeFactory<*>>,
     ){
-        operator fun getValue(thisRef: Any?, property: KProperty<*>): T?{
+        open operator fun getValue(thisRef: Any?, property: KProperty<*>): T?{
             return typeHandler(context[property.name], property.name)
         }
 
-        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
+        open operator fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
             context[property.name] = value
         }
 
-        private fun typeHandler(value: Any?, name: String): T? {
+        fun typeHandler(value: Any?, name: String): T? {
             return value?.let {
                 val outputType = type
                 // 查找能处理的类型

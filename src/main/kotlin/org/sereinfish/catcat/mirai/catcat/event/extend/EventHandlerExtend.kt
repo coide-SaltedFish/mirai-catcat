@@ -3,9 +3,11 @@ package org.sereinfish.catcat.mirai.catcat.event.extend
 import net.mamoe.mirai.event.Event
 import org.sereinfish.catcat.mirai.catcat.core.handler.Handler
 import org.sereinfish.catcat.mirai.catcat.core.handler.HandlerContext
+import org.sereinfish.catcat.mirai.catcat.event.extend.permission.PermissionChainBuilder
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.RouterChainBuilder
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandler
 import org.sereinfish.catcat.mirai.catcat.event.handler.EventHandlerContext
+import org.sereinfish.catcat.mirai.catcat.event.handler.filter.PermissionFilterHandler
 import org.sereinfish.catcat.mirai.catcat.event.handler.filter.RouterFilterHandler
 import org.sereinfish.catcat.mirai.catcat.event.untils.HandlerLevel
 import kotlin.reflect.KClass
@@ -95,6 +97,15 @@ class EventHandlerBuilder<E: Event>(
         val builder = RouterChainBuilder()
         builder.block()
         eventHandler.filter.add(RouterFilterHandler(builder.build()), HandlerLevel.ROUTER)
+    }
+
+    /**
+     * 构建权限检查器
+     */
+    fun permission(block: PermissionChainBuilder.() -> Unit){
+        val builder = PermissionChainBuilder()
+        builder.block()
+        eventHandler.filter.add(PermissionFilterHandler(builder.build()), HandlerLevel.ROUTER)
     }
 
     fun build() = eventHandler
