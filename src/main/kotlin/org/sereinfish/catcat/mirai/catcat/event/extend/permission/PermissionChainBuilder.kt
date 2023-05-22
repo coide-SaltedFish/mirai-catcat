@@ -15,19 +15,33 @@ class PermissionChainBuilder {
         list.add(permission)
     }
 
+    operator fun Permission.plus(other: Permission): List<Permission> {
+        list.add(this@plus)
+        list.add(other)
+        return list
+    }
+
+    operator fun List<Permission>.plus(other: Permission): List<Permission> {
+        list.add(other)
+        return list
+    }
+
+    operator fun Permission.unaryPlus(): List<Permission>{
+        list.add(this)
+        return list
+    }
+
     /**
      * 权限的 or 判断
      */
     infix fun Permission.or(second: Permission){
-        or(this, second)
+        add(or(this, second))
     }
 
     /**
      * 添加一个自定义构建的权限检查器
      */
-    suspend inline fun permission(crossinline block: suspend () -> Boolean){
-        add(buildPermission(block))
-    }
+    inline fun permission(crossinline block: suspend (EventFilterHandlerContext) -> Boolean) = buildPermission(block)
 
     fun build(): Permission {
         var node: Permission = Permission
@@ -41,10 +55,10 @@ class PermissionChainBuilder {
 /**
  * 简单的构建一个权限检查器
  */
-suspend inline fun buildPermission(crossinline block: suspend () -> Boolean): Permission{
+inline fun buildPermission(crossinline block: suspend (EventFilterHandlerContext) -> Boolean): Permission{
     return object : PermissionChain(){
         override suspend fun checkPermission(context: EventFilterHandlerContext): Boolean {
-            return block()
+            return block(context)
         }
     }
 }

@@ -18,6 +18,4 @@ class MemberIdPermission(
     }
 }
 
-fun PermissionChainBuilder.qq(qq: Long){
-    add(MemberIdPermission(qq))
-}
+fun PermissionChainBuilder.qq(qq: Long) = MemberIdPermission(qq)

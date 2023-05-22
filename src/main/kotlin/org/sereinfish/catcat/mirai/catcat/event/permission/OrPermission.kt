@@ -17,6 +17,4 @@ class OrPermission(
     }
 }
 
-fun PermissionChainBuilder.or(first: Permission, second: Permission){
-    add(OrPermission(first, second))
-}
+fun PermissionChainBuilder.or(first: Permission, second: Permission) = OrPermission(first, second)

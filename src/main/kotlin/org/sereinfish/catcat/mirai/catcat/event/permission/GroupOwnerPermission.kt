@@ -17,6 +17,4 @@ class GroupOwnerPermission: PermissionChain() {
     }
 }
 
-fun PermissionChainBuilder.groupOwner(){
-    add(GroupOwnerPermission())
-}
+fun PermissionChainBuilder.groupOwner() = GroupOwnerPermission()

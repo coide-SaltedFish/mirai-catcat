@@ -26,6 +26,7 @@ class EventFilterHandlerChain(
                 eventFilterContext.addAll(context)
 
                 val result = it.filter(eventFilterContext)
+
                 // 添加上下文
                 context.addAll(eventFilterContext)
 

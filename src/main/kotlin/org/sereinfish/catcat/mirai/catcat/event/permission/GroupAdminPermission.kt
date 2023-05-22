@@ -12,11 +12,9 @@ import org.sereinfish.catcat.mirai.catcat.event.handler.filter.EventFilterHandle
 class GroupAdminPermission: PermissionChain() {
     override suspend fun checkPermission(context: EventFilterHandlerContext): Boolean {
         return if (context.event is GroupMessageEvent){
-            context.event.sender.permission == MemberPermission.ADMINISTRATOR
+            context.event.sender.permission.level >= MemberPermission.ADMINISTRATOR.level
         }else false
     }
 }
 
-fun PermissionChainBuilder.groupAdmin(){
-    add(GroupAdminPermission())
-}
+fun PermissionChainBuilder.groupAdmin() = GroupAdminPermission()

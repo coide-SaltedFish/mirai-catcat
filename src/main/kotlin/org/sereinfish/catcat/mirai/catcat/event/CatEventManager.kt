@@ -17,7 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 object CatEventManager {
     private val contextScope = creatContextScope("CatEventManager") // 作用域
-    private const val maxThreadCount = 2 // 最大并发数
+    private const val maxThreadCount = 1 // 最大并发数
     private val eventQueue = LinkedBlockingQueue<Event>() // 事件队列
     // 插件列表
     private val plugins = SortedList<PluginEventInfo>()

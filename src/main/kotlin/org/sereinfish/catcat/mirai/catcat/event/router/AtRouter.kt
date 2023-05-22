@@ -5,6 +5,7 @@ import org.sereinfish.catcat.mirai.catcat.core.router.Router
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.AbstractRouter
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.RouterBuilderTool
 import org.sereinfish.catcat.mirai.catcat.event.extend.router.RouterChainBuilder
+import org.sereinfish.catcat.mirai.catcat.event.extend.router.buildRouterChain
 
 class AtRouter(
     val id: Long
@@ -16,4 +17,8 @@ class AtRouter(
     }
 }
 
-fun RouterChainBuilder.at(id: Long) = AtRouter(id)
+fun RouterChainBuilder.at(id: Long) = buildRouterChain {
+    AtRouter(id) + space()
+}
+
+fun RouterChainBuilder.atOnly(id: Long) = AtRouter(id)
